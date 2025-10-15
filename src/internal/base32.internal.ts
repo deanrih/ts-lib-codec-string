@@ -92,11 +92,11 @@ function base32Encode(
 	return result;
 }
 
-function base32Decode(input: string, encoding?: "buffer", options?: Base32DecodingOptions): Buffer;
-function base32Decode(input: string, encoding: "utf8", options?: Base32DecodingOptions): string;
+function base32Decode(input: string, decodeAs?: "buffer", options?: Base32DecodingOptions): Buffer;
+function base32Decode(input: string, decodeAs: "utf8", options?: Base32DecodingOptions): string;
 function base32Decode(
 	input: string,
-	encoding?: Base32DecodingEncoding,
+	decodeAs?: Base32DecodingEncoding,
 	options: Base32DecodingOptions = { variant: "base32" },
 ): Buffer | string {
 	input = input.trim().replaceAll(/=+/g, "");
@@ -132,7 +132,7 @@ function base32Decode(
 
 	const result = Buffer.from(resultBuffer);
 
-	if (encoding === undefined || encoding === "buffer") {
+	if (decodeAs === undefined || decodeAs === "buffer") {
 		return result;
 	} else {
 		return result.toString("utf8");
