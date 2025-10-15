@@ -1,13 +1,10 @@
 {
 	"name": "@deanrih/ts-lib-codec-string",
+	"description": "A small library for string encoding and decoding",
 	"version": "1.1.0",
-	"main": "./dist/index.cjs",
-	"module": "./dist/index.mjs",
-	"types": "./dist/index.d.ts",
 	"type": "module",
 	"license": "MIT",
 	"homepage": "https://deanrih.id/projects/self/ts-lib-codec-string",
-	"description": "A small library for string encoding and decoding",
 	"readme": "./README.md",
 	"author": {
 		"name": "deanrih",
@@ -22,27 +19,26 @@
 	},
 	"keywords": [],
 	"sideEffects": false,
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"./dist"
+	],
 	"exports": {
 		".": {
 			"import": {
 				"types": "./dist/index.d.ts",
-				"default": "./dist/index.mjs"
-			},
-			"require": {
-				"types": "./dist/index.d.cts",
-				"default": "./dist/index.cjs"
+				"default": "./dist/index.js"
 			}
 		},
 		"./base32": {
 			"import": {
 				"types": "./dist/internal/base32.internal.d.ts",
-				"default": "./dist/internal/base32.internal.mjs"
-			},
-			"require": {
-				"types": "./dist/internal/base32.internal.d.cts",
-				"default": "./dist/internal/base32.internal.cjs"
+				"default": "./dist/internal/base32.internal.js"
 			}
-		}
+		},
+		"./package.json": "./package.json"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -51,13 +47,13 @@
 		"dev": "bun run --watch ./example/index.example.ts",
 		"case:dev": "bun run --watch ./example/case.example.ts",
 		"test": "bun test",
-		"build": "bun ./build.ts",
+		"build": "bunx --bun bunup",
 		"release": "bun run test && bun run build && bun publish"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "latest",
 		"@types/bun": "latest",
-		"tsup": "latest",
+		"bunup": "latest",
 		"typescript": "latest"
 	},
 	"peerDependencies": {}
