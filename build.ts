@@ -10,22 +10,26 @@ const config = {
 	outDir: "./dist",
 	sourcemap: false,
 	splitting: false,
-	target: ["node24", "node25", "es2024", "esnext"],
+	// target: ["node24", "node25", "es2024", "esnext"],
+	target: "esnext",
 	treeshake: "smallest",
+	format: "esm",
 } satisfies Options;
 
 await $`rm -rf ./dist`;
 
-await Promise.all([
-	build({
-		...config,
-		format: "cjs",
-	}),
-	build({
-		...config,
-		format: "esm",
-		outExtension: () => {
-			return { js: ".mjs" };
-		},
-	}),
-]);
+await build(config);
+
+// await await Promise.all([
+// 	build({
+// 		...config,
+// 		format: "cjs",
+// 	}),
+// 	build({
+// 		...config,
+// 		format: "esm",
+// 		outExtension: () => {
+// 			return { js: ".mjs" };
+// 		},
+// 	}),
+// ]);
