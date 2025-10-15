@@ -16,6 +16,7 @@ const base32Variant = ["base32", "base32hex", "crockford"] as const;
 type Base32Variant = (typeof base32Variant)[number];
 type Base32Charset = Record<Base32Variant, string>;
 type Base32Padding = Record<Base32Variant, boolean>;
+type Base32DecodingEncoding = "buffer" | "utf8";
 
 interface Base32EncodingOptions {
 	variant: Base32Variant;
@@ -91,26 +92,32 @@ function base32Encode(
 	return result;
 }
 
-function base32Decode(input: string, options: Base32DecodingOptions = { variant: "base32" }): string {
-	const charset = base32Charset[options.variant];
-
+function base32Decode(input: string, encoding?: "buffer", options?: Base32DecodingOptions): Buffer;
+function base32Decode(input: string, encoding: "utf8", options?: Base32DecodingOptions): string;
+function base32Decode(
+	input: string,
+	encoding?: Base32DecodingEncoding,
+	options: Base32DecodingOptions = { variant: "base32" },
+): Buffer | string {
 	input = input.trim().replaceAll(/=+/g, "");
 
+	const charset = base32Charset[options.variant];
+	const charsetReversed: { [char: string]: number } = {};
 	const length = input.length;
+
+	for (let idx = 0; idx < charset.length; idx += 1) {
+		charsetReversed[charset[idx]] = idx;
+	}
 
 	let bits = 0;
 	let byte = 0;
-	let result = "";
+	const resultBuffer: number[] = [];
 
 	for (let idx = 0; idx < length; idx += 1) {
 		const current = input[idx];
-		if (current === undefined) {
-			throw Error();
-		}
+		const charIdx = charsetReversed[current];
 
-		const charIdx = charset.indexOf(current);
-
-		if (charIdx === -1) {
+		if (/* charIdx === -1 */ charIdx === undefined) {
 			throw Error();
 		}
 
@@ -119,10 +126,17 @@ function base32Decode(input: string, options: Base32DecodingOptions = { variant:
 
 		if (bits >= 8) {
 			bits -= 8;
-			result += String.fromCharCode((byte >>> bits) & 255);
+			resultBuffer.push((byte >>> bits) & 0xff);
 		}
 	}
 
-	return result;
+	const result = Buffer.from(resultBuffer);
+
+	if (encoding === undefined || encoding === "buffer") {
+		return result;
+	} else {
+		return result.toString("utf8");
+	}
 }
+
 export { base32Encode, base32Decode };
