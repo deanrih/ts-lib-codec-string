@@ -21,6 +21,7 @@
 		"url": "https://github.com/deanrih/ts-lib-codec-string/issues"
 	},
 	"keywords": [],
+	"sideEffects": false,
 	"exports": {
 		".": {
 			"import": {
@@ -30,6 +31,16 @@
 			"require": {
 				"types": "./dist/index.d.cts",
 				"default": "./dist/index.cjs"
+			}
+		},
+		"./base32": {
+			"import": {
+				"types": "./dist/internal/base32.internal.d.ts",
+				"default": "./dist/internal/base32.internal.mjs"
+			},
+			"require": {
+				"types": "./dist/internal/base32.internal.d.cts",
+				"default": "./dist/internal/base32.internal.cjs"
 			}
 		}
 	},
