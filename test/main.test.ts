@@ -1,73 +1,124 @@
 import { describe, expect, it } from "bun:test";
 import { base32Decode, base32Encode } from "../src";
 
-interface Round {
+interface TruthTable {
 	buffer: Buffer;
-	plain?: string;
+	string: string;
 	base32: string;
-	base64: string;
-	hex: string;
 }
-const rounds: Round[] = [
-	{ buffer: Buffer.from(""), plain: "", base32: "", base64: "", hex: "" },
-	{ buffer: Buffer.from("a"), plain: "a", base32: "ME======", base64: "", hex: "" },
-	{ buffer: Buffer.from("f"), plain: "f", base32: "MY======", base64: "", hex: "" },
-	{ buffer: Buffer.from("fo"), plain: "fo", base32: "MZXQ====", base64: "", hex: "" },
-	{ buffer: Buffer.from("foo"), plain: "foo", base32: "MZXW6===", base64: "", hex: "" },
-	{ buffer: Buffer.from("foob"), plain: "foob", base32: "MZXW6YQ=", base64: "", hex: "" },
 
-	{ buffer: Buffer.from("fooba"), plain: "fooba", base32: "MZXW6YTB", base64: "", hex: "" },
-	{ buffer: Buffer.from("foobar"), plain: "foobar", base32: "MZXW6YTBOI======", base64: "", hex: "" },
-	{
-		buffer: Buffer.from("Base32Encoding.com"),
-		plain: "Base32Encoding.com",
-		base32: "IJQXGZJTGJCW4Y3PMRUW4ZZOMNXW2===",
-		base64: "",
-		hex: "",
-	},
-	{ buffer: Buffer.from("0"), plain: "0", base32: "GA======", base64: "", hex: "" },
-	{
-		buffer: Buffer.from("Base32 Encoding"),
-		plain: "Base32 Encoding",
-		base32: "IJQXGZJTGIQEK3TDN5SGS3TH",
-		base64: "",
-		hex: "",
-	},
-	{ buffer: Buffer.from("DiMolnar"), plain: "DiMolnar", base32: "IRUU233MNZQXE===", base64: "", hex: "" },
-	{
-		buffer: Buffer.from([...Buffer.from("Hello!"), 0xde, 0xad, 0xbe, 0xef]),
-		plain: undefined,
-		// plain: "Hello!Þ­¾ï",
-		base32: "JBSWY3DPEHPK3PXP",
-		base64: "",
-		hex: "",
-	},
+interface Round {
+	input: Buffer | string;
+	truthTable: TruthTable;
+}
+
+function generateStringRoundFromArray(input: string[][]): Round[] {
+	return input.map((x) => {
+		return <Round>{
+			input: x[0],
+			truthTable: {
+				buffer: Buffer.from(x[0]),
+				string: x[0],
+				base32: x[1],
+			},
+		};
+	});
+}
+
+function generateBufferRoundFromArray(input: (string | Buffer)[][]): Round[] {
+	return input.map((x) => {
+		return <Round>{
+			input: <Buffer>x[0],
+			truthTable: {
+				buffer: <Buffer>x[0],
+				string: (<Buffer>x[0]).toString("utf8"),
+				base32: x[1],
+			},
+		};
+	});
+}
+
+// [buffer, base32]
+const sourceBuffer = [
+	[Buffer.from(""), ""],
+	[Buffer.from("1"), "GE======"],
+	[Buffer.from("2"), "GI======"],
+	[Buffer.from("3"), "GM======"],
+	[Buffer.from("a"), "ME======"],
+	[Buffer.from("b"), "MI======"],
+	[Buffer.from("c"), "MM======"],
+	[Buffer.from("f"), "MY======"],
+	[Buffer.from("fo"), "MZXQ===="],
+	[Buffer.from("foo"), "MZXW6==="],
+	[Buffer.from("foob"), "MZXW6YQ="],
+	[Buffer.from("fooba"), "MZXW6YTB"],
+	[Buffer.from("foobar"), "MZXW6YTBOI======"],
+	[Buffer.from("Base32"), "IJQXGZJTGI======"],
+	[Buffer.from("Base32Encoding"), "IJQXGZJTGJCW4Y3PMRUW4ZY="],
+	[Buffer.from("Base32EncodingTest"), "IJQXGZJTGJCW4Y3PMRUW4Z2UMVZXI==="],
+	[Buffer.from("HelloWorld!"), "JBSWY3DPK5XXE3DEEE======"],
+	[Buffer.from("Hello World!"), "JBSWY3DPEBLW64TMMQQQ===="],
+	[Buffer.from([...Buffer.from("Hello!"), 0xde, 0xad, 0xbe, 0xef]), "JBSWY3DPEHPK3PXP"],
+];
+// [string, base32]
+const sourceString = [
+	["", ""],
+	["1", "GE======"],
+	["2", "GI======"],
+	["3", "GM======"],
+	["a", "ME======"],
+	["b", "MI======"],
+	["c", "MM======"],
+	["f", "MY======"],
+	["fo", "MZXQ===="],
+	["foo", "MZXW6==="],
+	["foob", "MZXW6YQ="],
+	["fooba", "MZXW6YTB"],
+	["foobar", "MZXW6YTBOI======"],
+	["Base32", "IJQXGZJTGI======"],
+	["Base32Encoding", "IJQXGZJTGJCW4Y3PMRUW4ZY="],
+	["Base32EncodingTest", "IJQXGZJTGJCW4Y3PMRUW4Z2UMVZXI==="],
+	["HelloWorld!", "JBSWY3DPK5XXE3DEEE======"],
+	["Hello World!", "JBSWY3DPEBLW64TMMQQQ===="],
 ];
 
-describe("base32 plain", () => {
-	for (const { base32, plain } of rounds) {
-		if (plain !== undefined) {
-			it(`encode/decode plain\t[${plain}] <==> [${base32}]`, () => {
-				const resEnc = base32Encode(plain);
-				const resDec = base32Decode(base32);
+const bufferRounds: Round[] = generateBufferRoundFromArray(sourceBuffer);
+const stringRounds: Round[] = generateStringRoundFromArray(sourceString);
 
-				expect(resEnc).toBe(base32);
-				expect(resDec).toBe(plain);
-				// expect(resDec).toBe("Hello!Þ­¾ï");
-			});
-		}
+describe("base32 with buffer", () => {
+	for (const round of bufferRounds) {
+		const input = <Buffer>round.input;
+		const stringWidth = Bun.stringWidth(`${round.input}`);
+		const testTitle = [" ".repeat(20 - stringWidth), `${round.input}`].join("");
+		it(`buffer [${testTitle}] = enc, enc -> dec buf, enc -> dec str`, () => {
+			const tt = round.truthTable;
+
+			const resEncString = base32Encode(input);
+			const resDecBuffer = base32Decode(resEncString);
+			const resDecString = base32Decode(resEncString, "utf8");
+
+			expect(resEncString).toEqual(tt.base32);
+			expect(resDecBuffer).toEqual(tt.buffer);
+			expect(resDecString).toEqual(tt.string);
+		});
 	}
 });
 
-describe("base32 buffer", () => {
-	for (const { base32, buffer } of rounds) {
-		it(`encode/decode buffer\t[${buffer}] <==> [${base32}]`, () => {
-			const resEnc = base32Encode(buffer);
-			// const resDec = base32Decode(base32);
-			expect(resEnc).toBe(base32);
-			// expect(resDec).toBe(plain);
-			// expect(resDec).toBe("Hello!Þ­¾ï");
-			// console.log(`[${resDec}]`);
+describe("base32 with string", () => {
+	for (const round of stringRounds) {
+		const input = <string>round.input;
+		const stringWidth = Bun.stringWidth(input);
+		const testTitle = [" ".repeat(20 - stringWidth), input].join("");
+		it(`string [${testTitle}] = enc, enc -> dec buf, enc -> dec str`, () => {
+			const tt = round.truthTable;
+
+			const resEncString = base32Encode(input);
+			const resDecBuffer = base32Decode(resEncString);
+			const resDecString = base32Decode(resEncString, "utf8");
+
+			expect(resEncString).toEqual(tt.base32);
+			expect(resDecBuffer).toEqual(tt.buffer);
+			expect(resDecString).toEqual(tt.string);
 		});
 	}
 });
