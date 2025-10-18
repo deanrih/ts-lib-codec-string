@@ -27,6 +27,6 @@ console.log(decoded);
 console.log(decoded.toString("utf8"));
 ```
 
-Checkout the [example](https://github.com/deanrih/totp-ts/blob/main/example) folder.
+Checkout the [example](https://github.com/deanrih/ts-lib-codec-string/blob/main/example) folder.
 
 ## Credits/Reference
