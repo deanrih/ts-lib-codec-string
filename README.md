@@ -16,8 +16,15 @@ npm install @deanrih/ts-lib-codec-string
 ## Usage
 
 ```ts
-import { } from "@deanrih/ts-lib-codec-string";
+import { base32Decode, base32Encode } from "@deanrih/ts-lib-codec-string";
 
+const plainText = "Hello World!";
+const encoded = base32Encode(plainText);
+const decoded = base32Decode(encoded);
+
+console.log(encoded);
+console.log(decoded);
+console.log(decoded.toString("utf8"));
 ```
 
 Checkout the [example](https://github.com/deanrih/totp-ts/blob/main/example) folder.
