@@ -1,7 +1,10 @@
 import { defineConfig } from "bunup";
 
 export default defineConfig({
-	entry: ["./src/**/*.ts"],
+	entry: [
+		// "./src/**/*.ts",
+		"./src/*.ts"
+	],
 	minify: true,
 	target: "bun", // "esnext"
 	format: "esm",
